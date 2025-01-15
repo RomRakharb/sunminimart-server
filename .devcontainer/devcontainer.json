@@ -6,7 +6,7 @@
 		"ghcr.io/devcontainers/features/rust:1": {}
 	},
 
-	 // "forwardPorts": [],
+	"forwardPorts": [ 8080 ],
 
 	"postCreateCommand": "bash .devcontainer/install.sh"
 }
