@@ -3,7 +3,9 @@
 	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 	
 	"features": {
-		"ghcr.io/devcontainers/features/rust:1": {}
+		"ghcr.io/devcontainers/features/rust:1": {
+			"profile" : "default"
+		}
 	},
 
 	"forwardPorts": [ 8080 ],
