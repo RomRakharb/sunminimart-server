@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.8.1"
-sqlx = "0.8.3"
-tokio = "1.43.0"
+axum = { version = "0.8.1" }
+sqlx = { version = "0.8.3",  features = [ "runtime-tokio", "tls-native-tls", "mysql" ] }
+tokio = { version = "1.43.0", features = [ "rt-multi-thread" ] }
