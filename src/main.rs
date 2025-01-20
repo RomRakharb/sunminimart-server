@@ -1,3 +1,10 @@
+// TODO: init
+// Create user sunminimart **** password must be kept somewhere else!!!!!
+// Connect trough user sunminimart
+// Create database "sunminimart"
+// Connect to the database
+// Start Creating Table
+
 use sqlx::{mysql::MySqlPoolOptions, query, Executor, MySqlPool};
 
 #[tokio::main]
