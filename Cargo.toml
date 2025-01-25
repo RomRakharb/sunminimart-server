@@ -7,3 +7,4 @@ edition = "2021"
 axum = { version = "0.8.1" }
 sqlx = { version = "0.8.3",  features = [ "runtime-tokio", "tls-native-tls", "mysql" ] }
 tokio = { version = "1.43.0", features = [ "rt-multi-thread" ] }
+urlencoding = "2.1.3"
