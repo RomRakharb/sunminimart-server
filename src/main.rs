@@ -51,6 +51,37 @@ async fn init() -> sqlx::Result<MySqlPool> {
         .await?;
     sqlx::query("FLUSH PRIVILEGES;").execute(&pool).await?;
 
+    let pool = connect_user_sunminimart().await?;
+    sqlx::query(
+        "
+        CREATE TABLE IF NOT EXISTS products (
+            ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            Barcode VARCHAR(64) UNIQUE NOT NULL,
+            Name VARCHAR(64) NOT NULL,
+            Cost DECIMAL(5, 2) NOT NULL,
+            Retail DECIMAL(5, 2) NOT NULL,
+            Wholesale DECIMAL(5, 2) NOT NULL,
+            Amount SMALLINT UNSIGNED DEFAULT 0
+        );
+        ",
+    )
+    .execute(&pool)
+    .await?;
+
+    sqlx::query(
+        "
+        CREATE TABLE IF NOT EXISTS expire_dates (
+            ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            Barcode VARCHAR(64) NOT NULL,
+            Expire_Date DATE NOT NULL,
+            FOREIGN KEY (Barcode) REFERENCES products(Barcode) ON DELETE CASCADE ON UPDATE CASCADE,
+            UNIQUE (Barcode, Expire_Date)  -- Optional: Prevent duplicate barcodes on the same date
+        );
+        ",
+    )
+    .execute(&pool)
+    .await?;
+
     connect_user_sunminimart().await
 }
 
