@@ -5,6 +5,9 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.8.1" }
-sqlx = { version = "0.8.3",  features = [ "runtime-tokio", "tls-native-tls", "mysql" ] }
-tokio = { version = "1.43.0", features = [ "rt-multi-thread" ] }
+bigdecimal = "0.4.7"
+chrono = "0.4.40"
+dotenv = "0.15.0"
+sqlx = { version = "0.8.3",  features = [ "runtime-tokio", "tls-native-tls", "mysql", "bigdecimal", "chrono" ] }
+tokio = { version = "1.43.0", features = [ "rt-multi-thread", "sync" ] }
 urlencoding = "2.1.3"
