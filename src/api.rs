@@ -28,7 +28,7 @@ pub async fn add_product(
     Ok(())
 }
 
-pub async fn get_price(barcode: &str) -> sqlx::Result<Option<(String, BigDecimal)>> {
+pub async fn get_price_retail(barcode: &str) -> sqlx::Result<Option<(String, BigDecimal)>> {
     struct Product {
         pub name: String,
         pub price: BigDecimal,
@@ -39,7 +39,7 @@ pub async fn get_price(barcode: &str) -> sqlx::Result<Option<(String, BigDecimal
         "
         SELECT
             Name AS name,
-            Wholesale AS price
+            Retail AS price
         FROM products
         WHERE Barcode = ?
         ",
@@ -130,8 +130,8 @@ mod test {
     #[test]
     fn test_api() {
         assert!(adding_product().is_ok());
-        assert!(getting_price().is_ok());
         assert!(restocking().is_ok());
+        assert!(getting_price_retail().is_ok());
         assert!(selling().is_ok());
         assert!(deleting_product().is_ok());
     }
@@ -143,8 +143,8 @@ mod test {
     }
 
     #[tokio::test]
-    async fn getting_price() -> sqlx::Result<()> {
-        if let Some((name, price)) = get_price("0").await? {
+    async fn getting_price_retail() -> sqlx::Result<()> {
+        if let Some((name, price)) = get_price_retail("0").await? {
             assert_eq!(name, "test");
             assert_eq!(price, BigDecimal::from_f32(1.0).unwrap());
         };
