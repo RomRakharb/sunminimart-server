@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        CREATE TABLE IF NOT EXISTS products (\n            ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n            Barcode VARCHAR(64) UNIQUE NOT NULL,\n            Name VARCHAR(64) NOT NULL,\n            Cost DECIMAL(5, 2) NOT NULL,\n            Retail DECIMAL(5, 2) NOT NULL,\n            Wholesale DECIMAL(5, 2) NOT NULL\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "340a49ae1aff73cb0d5bb513eeb204ff930a7d0fcab5f06cfd312fc0364fd368"
+}

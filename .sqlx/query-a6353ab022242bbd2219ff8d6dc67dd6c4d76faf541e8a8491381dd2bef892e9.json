@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "CREATE DATABASE IF NOT EXISTS sunminimart",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "a6353ab022242bbd2219ff8d6dc67dd6c4d76faf541e8a8491381dd2bef892e9"
+}

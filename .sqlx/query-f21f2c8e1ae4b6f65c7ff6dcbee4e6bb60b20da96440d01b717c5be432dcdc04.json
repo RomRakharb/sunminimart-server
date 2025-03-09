@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        DELETE FROM stocks\n        WHERE Barcode = ?\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "f21f2c8e1ae4b6f65c7ff6dcbee4e6bb60b20da96440d01b717c5be432dcdc04"
+}

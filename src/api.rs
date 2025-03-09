@@ -13,8 +13,8 @@ pub async fn add_product(
     sqlx::query!(
         "
         INSERT INTO products
-            (Barcode, Name, Cost, Retail, Wholesale, Amount)
-        VALUES (?, ?, ?, ?, ?, 0);
+            (Barcode, Name, Cost, Retail, Wholesale)
+        VALUES (?, ?, ?, ?, ?);
         ",
         barcode,
         name,
@@ -58,24 +58,13 @@ pub async fn get_price_retail(barcode: &str) -> sqlx::Result<Option<(String, Big
 pub async fn restock(barcode: &str, amount: u16, date: Option<NaiveDate>) -> sqlx::Result<()> {
     sqlx::query!(
         "
-        UPDATE products
-        SET Amount = Amount + ?
-        WHERE Barcode = ?
-        ",
-        amount,
-        barcode
-    )
-    .execute(pool().await)
-    .await?;
-
-    sqlx::query!(
-        "
-        INSERT INTO expire_dates
-            (Barcode, Expire_date)
-        VALUES (?, ?)
+        INSERT INTO stocks
+            (Barcode, Expire_Date, Amount)
+        VALUES (?, ?, ?)
         ",
         barcode,
-        date
+        date,
+        amount
     )
     .execute(pool().await)
     .await?;
@@ -86,7 +75,7 @@ pub async fn restock(barcode: &str, amount: u16, date: Option<NaiveDate>) -> sql
 pub async fn sell(barcode: &str) -> sqlx::Result<()> {
     sqlx::query!(
         "
-        UPDATE products
+        UPDATE stocks
         SET Amount = Amount - 1
         WHERE Barcode = ?
         ",
@@ -110,7 +99,7 @@ pub async fn delete_product(barcode: &str) -> sqlx::Result<()> {
 
     sqlx::query!(
         "
-        DELETE FROM expire_dates
+        DELETE FROM stocks
         WHERE Barcode = ?
         ",
         barcode

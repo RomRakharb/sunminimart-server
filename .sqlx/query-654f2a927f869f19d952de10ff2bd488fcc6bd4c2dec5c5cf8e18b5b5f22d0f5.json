@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        CREATE TABLE IF NOT EXISTS stocks (\n            ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n            Barcode VARCHAR(64) NOT NULL,\n            Expire_Date DATE NOT NULL,\n            Amount SMALLINT UNSIGNED DEFAULT 0,\n            FOREIGN KEY (Barcode) REFERENCES products(Barcode) ON DELETE CASCADE ON UPDATE CASCADE,\n            UNIQUE (Barcode, Expire_Date)\n        );\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "654f2a927f869f19d952de10ff2bd488fcc6bd4c2dec5c5cf8e18b5b5f22d0f5"
+}

@@ -1,11 +1,11 @@
 {
   "db_name": "MySQL",
-  "query": "\n        SELECT Name, Wholesale FROM products\n        WHERE Barcode = ?\n        ",
+  "query": "\n        SELECT\n            Name AS name,\n            Retail AS price\n        FROM products\n        WHERE Barcode = ?\n        ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "Name",
+        "name": "name",
         "type_info": {
           "type": "VarString",
           "flags": "NOT_NULL | NO_DEFAULT_VALUE",
@@ -14,7 +14,7 @@
       },
       {
         "ordinal": 1,
-        "name": "Wholesale",
+        "name": "price",
         "type_info": {
           "type": "NewDecimal",
           "flags": "NOT_NULL | NO_DEFAULT_VALUE",
@@ -30,5 +30,5 @@
       false
     ]
   },
-  "hash": "ffccf5ed0cf9511f75f021af27a7bc3a6925924ab034c46bc1a3398fd07b3187"
+  "hash": "2c3a1b209b3e63d71df87e9294af33801d29aa49ba3615a87ca95b2e72a0b126"
 }

@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        INSERT INTO stocks\n            (Barcode, Expire_Date, Amount)\n        VALUES (?, ?, ?)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "2b71f48968c11fb2deb2a232284ae0b6f20f9060d907b9e353bd2a741c295f6a"
+}

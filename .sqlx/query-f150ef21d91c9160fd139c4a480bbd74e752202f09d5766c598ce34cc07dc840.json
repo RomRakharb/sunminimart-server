@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "GRANT ALL PRIVILEGES ON sunminimart.* TO 'sunminimart'@'localhost';",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "f150ef21d91c9160fd139c4a480bbd74e752202f09d5766c598ce34cc07dc840"
+}
