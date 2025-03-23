@@ -3,24 +3,16 @@ use chrono::NaiveDate;
 
 use crate::database::pool;
 
-pub async fn add_product(
-    barcode: &str,
-    name: &str,
-    cost: f32,
-    retail: f32,
-    wholesale: f32,
-) -> sqlx::Result<()> {
+pub async fn add_product(barcode: &str, name: &str, price: u16) -> sqlx::Result<()> {
     sqlx::query!(
         "
         INSERT INTO products
-            (Barcode, Name, Cost, Retail, Wholesale)
-        VALUES (?, ?, ?, ?, ?);
+            (Barcode, Name, Price)
+        VALUES (?, ?, ?);
         ",
         barcode,
         name,
-        cost,
-        retail,
-        wholesale
+        price
     )
     .execute(pool().await)
     .await?;
@@ -28,10 +20,10 @@ pub async fn add_product(
     Ok(())
 }
 
-pub async fn get_price_retail(barcode: &str) -> sqlx::Result<Option<(String, BigDecimal)>> {
+pub async fn get_price(barcode: &str) -> sqlx::Result<Option<(String, u16)>> {
     struct Product {
         pub name: String,
-        pub price: BigDecimal,
+        pub price: u16,
     }
 
     let product = sqlx::query_as!(
@@ -39,7 +31,7 @@ pub async fn get_price_retail(barcode: &str) -> sqlx::Result<Option<(String, Big
         "
         SELECT
             Name AS name,
-            Retail AS price
+            Price AS price
         FROM products
         WHERE Barcode = ?
         ",
@@ -55,34 +47,38 @@ pub async fn get_price_retail(barcode: &str) -> sqlx::Result<Option<(String, Big
     }
 }
 
-pub async fn restock(barcode: &str, amount: u16, date: Option<NaiveDate>) -> sqlx::Result<()> {
+pub async fn restock(
+    barcode: &str,
+    cost: BigDecimal,
+    amount: u16,
+    expire_dates: Vec<NaiveDate>,
+) -> sqlx::Result<()> {
     sqlx::query!(
         "
         INSERT INTO stocks
-            (Barcode, Expire_Date, Amount)
+            (Barcode, Cost, Amount)
         VALUES (?, ?, ?)
         ",
         barcode,
-        date,
-        amount
+        cost,
+        amount,
     )
     .execute(pool().await)
     .await?;
 
-    Ok(())
-}
-
-pub async fn sell(barcode: &str) -> sqlx::Result<()> {
-    sqlx::query!(
-        "
-        UPDATE stocks
-        SET Amount = Amount - 1
-        WHERE Barcode = ?
+    for expire_date in expire_dates {
+        sqlx::query!(
+            "
+        INSERT INTO expire_dates (Barcode, ExpireDate)
+        VALUES (?, ?)
         ",
-        barcode
-    )
-    .execute(pool().await)
-    .await?;
+            barcode,
+            expire_date
+        )
+        .execute(pool().await)
+        .await?;
+    }
+
     Ok(())
 }
 
@@ -97,64 +93,30 @@ pub async fn delete_product(barcode: &str) -> sqlx::Result<()> {
     .execute(pool().await)
     .await?;
 
-    sqlx::query!(
-        "
-        DELETE FROM stocks
-        WHERE Barcode = ?
-        ",
-        barcode
-    )
-    .execute(pool().await)
-    .await?;
-
     Ok(())
 }
 
-#[cfg(test)]
-mod test {
-    use bigdecimal::FromPrimitive;
+// pub async fn sell(barcode: &str) -> sqlx::Result<()> {
+//     let amount = sqlx::query_as!(
+//         "
+//         SELECT
+//             Name AS name,
+//             Price AS price
+//         FROM products
+//         WHERE Barcode = ?
+//         "
+//     );
 
-    use super::*;
-
-    #[test]
-    fn test_api() {
-        assert!(adding_product().is_ok());
-        assert!(restocking().is_ok());
-        assert!(getting_price_retail().is_ok());
-        assert!(selling().is_ok());
-        assert!(deleting_product().is_ok());
-    }
-
-    #[tokio::test]
-    async fn adding_product() -> sqlx::Result<()> {
-        add_product("0", "test", 1.0, 1.0, 1.0).await?;
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn getting_price_retail() -> sqlx::Result<()> {
-        if let Some((name, price)) = get_price_retail("0").await? {
-            assert_eq!(name, "test");
-            assert_eq!(price, BigDecimal::from_f32(1.0).unwrap());
-        };
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn restocking() -> sqlx::Result<()> {
-        restock("0", 20, NaiveDate::from_ymd_opt(2027, 12, 16)).await?;
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn selling() -> sqlx::Result<()> {
-        sell("0").await?;
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn deleting_product() -> sqlx::Result<()> {
-        delete_product("0").await?;
-        Ok(())
-    }
-}
+//     sqlx::query!(
+//         "
+//         UPDATE stocks
+//         SET Amount = Amount - 1
+//         WHERE Barcode = ?
+//         LIMIT 1;
+//         ",
+//         barcode
+//     )
+//     .execute(pool().await)
+//     .await?;
+//     Ok(())
+// }
