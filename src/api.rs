@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::NaiveDate;
 use sqlx::types::BigDecimal;
 use sqlx::types::Decimal;
-use tokio::try_join;
+use tokio::task::JoinSet;
 
 use std::str::FromStr;
 
@@ -22,9 +22,10 @@ pub struct AddProduct {
     amount: u16,
     expire_dates: Vec<[u32; 3]>, // ymd
 }
-
 pub async fn add_product(extract::Json(payload): extract::Json<AddProduct>) -> impl IntoResponse {
-    match (
+    let mut set = JoinSet::new();
+
+    set.spawn(
         sqlx::query!(
             "
             INSERT INTO products
@@ -35,8 +36,10 @@ pub async fn add_product(extract::Json(payload): extract::Json<AddProduct>) -> i
             payload.name,
             payload.price
         )
-        .execute(pool().await)
-        .await,
+        .execute(pool().await),
+    );
+
+    set.spawn(
         sqlx::query!(
             "
             INSERT INTO stocks
@@ -44,21 +47,47 @@ pub async fn add_product(extract::Json(payload): extract::Json<AddProduct>) -> i
             VALUES (?, ?, ?);
             ",
             payload.barcode,
-            BigDecimal::from_str(&payload.cost.to_string())
-                .expect("add product error at BigDecimal"),
+            payload.cost,
             payload.amount
         )
-        .execute(pool().await)
-        .await,
-    ) {
-        (Ok(_), Ok(_)) => {
-            (axum::http::StatusCode::OK, "Product added successfully").into_response()
+        .execute(pool().await),
+    );
+
+    for exp in payload.expire_dates {
+        if let Some(date) = NaiveDate::from_ymd_opt(exp[0] as i32, exp[1], exp[2]) {
+            set.spawn(
+                sqlx::query!(
+                    "
+            INSERT INTO expire_dates
+                (Barcode, ExpireDate)
+            VALUES (?, ?);
+            ",
+                    payload.barcode,
+                    date
+                )
+                .execute(pool().await),
+            );
+        } else {
+            set.spawn(async { Err(sqlx::Error::Decode("Invalid expire date".into())) });
         }
-        (_, _) => (
+    }
+
+    if set.join_all().await.iter().all(|res| res.is_ok()) {
+        (axum::http::StatusCode::OK, "Product added successfully").into_response()
+    } else {
+        let _ = sqlx::query!(
+            "
+            DELETE FROM products WHERE Barcode = ?;
+            ",
+            payload.barcode,
+        )
+        .execute(pool().await)
+        .await;
+        (
             axum::http::StatusCode::INTERNAL_SERVER_ERROR,
             "Error adding product",
         )
-            .into_response(),
+            .into_response()
     }
 }
 
