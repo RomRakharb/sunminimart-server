@@ -1,5 +1,5 @@
 use dotenv::dotenv;
-use sqlx::{mysql::MySqlPoolOptions, Acquire, MySqlPool};
+use sqlx::{mysql::MySqlPoolOptions, MySqlPool};
 use std::env;
 use tokio::sync::OnceCell;
 
