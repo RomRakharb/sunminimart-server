@@ -1,3 +1,4 @@
+use axum::routing::post;
 use axum::{routing::get, Router};
 
 use sunminimart_server::api;
@@ -17,7 +18,8 @@ async fn main() -> sqlx::Result<()> {
     // println!("{:?}", prob);
 
     let app = Router::new()
-        .route("/product", get(|| async { "Hello, World!" }))
+        .route("/product", post(api::add_product))
+        .route("/price/:barcode", get(api::get_price))
         .route("/exp", get(|| async { "Hello, World!" }));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

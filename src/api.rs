@@ -1,32 +1,75 @@
-use bigdecimal::BigDecimal;
-use chrono::NaiveDate;
+use axum::{
+    extract::{self, Path},
+    response::IntoResponse,
+    Json,
+};
+use serde::{Deserialize, Serialize};
+use sqlx::types::chrono::NaiveDate;
+use sqlx::types::BigDecimal;
+use sqlx::types::Decimal;
+use tokio::try_join;
+
+use std::str::FromStr;
 
 use crate::database::pool;
 
-pub async fn add_product(barcode: &str, name: &str, price: u16) -> sqlx::Result<()> {
-    sqlx::query!(
-        "
-        INSERT INTO products
-            (Barcode, Name, Price)
-        VALUES (?, ?, ?);
-        ",
-        barcode,
-        name,
-        price
-    )
-    .execute(pool().await)
-    .await?;
-
-    Ok(())
+#[derive(Deserialize)]
+pub struct AddProduct {
+    barcode: String,
+    name: String,
+    cost: Decimal,
+    price: u16,
+    amount: u16,
+    expire_dates: Vec<[u32; 3]>, // ymd
 }
 
-pub async fn get_price(barcode: &str) -> sqlx::Result<Option<(String, u16)>> {
+pub async fn add_product(extract::Json(payload): extract::Json<AddProduct>) -> impl IntoResponse {
+    match (
+        sqlx::query!(
+            "
+            INSERT INTO products
+                (Barcode, Name, Price)
+            VALUES (?, ?, ?);
+            ",
+            payload.barcode,
+            payload.name,
+            payload.price
+        )
+        .execute(pool().await)
+        .await,
+        sqlx::query!(
+            "
+            INSERT INTO stocks
+                (Barcode, Cost, amount)
+            VALUES (?, ?, ?);
+            ",
+            payload.barcode,
+            BigDecimal::from_str(&payload.cost.to_string())
+                .expect("add product error at BigDecimal"),
+            payload.amount
+        )
+        .execute(pool().await)
+        .await,
+    ) {
+        (Ok(_), Ok(_)) => {
+            (axum::http::StatusCode::OK, "Product added successfully").into_response()
+        }
+        (_, _) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            "Error adding product",
+        )
+            .into_response(),
+    }
+}
+
+pub async fn get_price(Path(barcode): Path<String>) -> impl IntoResponse {
+    #[derive(Serialize)]
     struct Product {
         pub name: String,
         pub price: u16,
     }
 
-    let product = sqlx::query_as!(
+    match sqlx::query_as!(
         Product,
         "
         SELECT
@@ -38,12 +81,14 @@ pub async fn get_price(barcode: &str) -> sqlx::Result<Option<(String, u16)>> {
         barcode
     )
     .fetch_optional(pool().await)
-    .await?;
-
-    if let Some(product) = product {
-        Ok(Some((product.name, product.price)))
-    } else {
-        Ok(None)
+    .await
+    {
+        Ok(product) => (axum::http::StatusCode::OK, Json(product)).into_response(),
+        Err(_) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            "Error getting price",
+        )
+            .into_response(),
     }
 }
 

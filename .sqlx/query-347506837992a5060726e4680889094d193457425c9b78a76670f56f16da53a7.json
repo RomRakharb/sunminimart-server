@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        INSERT INTO products\n            (Barcode, Name, Price)\n        VALUES (?, ?, ?);\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "347506837992a5060726e4680889094d193457425c9b78a76670f56f16da53a7"
+}
