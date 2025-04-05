@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n                    INSERT INTO expire_dates\n                        (Barcode, ExpireDate)\n                    VALUES (?, ?);\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "cc7e5af28d568297cdb89ad1438207108ea55f551dbd543afca4403c649c52f0"
+}

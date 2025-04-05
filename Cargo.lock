@@ -162,6 +162,8 @@ dependencies = [
  "num-bigint",
  "num-integer",
  "num-traits",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1905,6 +1907,7 @@ name = "sunminimart-server"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "bigdecimal",
  "chrono",
  "dotenv",
  "rust_decimal",
